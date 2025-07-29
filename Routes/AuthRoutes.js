@@ -19,6 +19,7 @@ router.get('/check-auth', auth, authController.checkAuth);
 
 // Profile Routes
 router.get('/profile', auth, profileController.getProfile);
+router.get('/profile/:id', auth, profileController.getSingleProfile);
 router.put('/profile/update', auth, profileController.updateProfile);
 router.put('/profile/upload', auth, upload.single('image'), profileController.uploadProfilePicture);
 

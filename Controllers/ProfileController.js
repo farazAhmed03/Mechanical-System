@@ -8,96 +8,113 @@ const { scheduleJob } = require('node-schedule');
 
 //! ================= Get Profile =====================
 const getProfile = async (req, res, next) => {
-    try {
-        const user = await User.findById(req.user.userId)
-            .populate('profile')
-            .select('-password -__v');
+  try {
+    const user = await User.findById(req.user.userId)
+      .populate('profile')
+      .select('-password -__v');
 
-        if (!user) {
-            return sendResponse(res, 404, false, 'User not found');
-        }
-
-        // Create profile if doesn't exist
-        if (!user.profile) {
-            const newProfile = await Profile.create({
-                gender: null,
-                dateOfBirth: null,
-                about: null,
-                contactNumber: null,
-                location: null
-            });
-            user.profile = newProfile._id;
-            await user.save();
-        }
-
-        return sendResponse(res, 200, true, 'Profile retrieved successfully', user);
-
-    } catch (error) {
-        next(error);
+    if (!user) {
+      return sendResponse(res, 404, false, 'User not found');
     }
+
+    if (!user.profile) {
+      const newProfile = await Profile.create({});
+      user.profile = newProfile._id;
+      await user.save();
+    }
+
+    return sendResponse(res, 200, true, 'Profile retrieved successfully', {
+      user,
+      profile: user.profile,
+    });
+
+  } catch (error) {
+    next(error);
+  }
 };
 
+
+//! ================= Get Single Profile =====================
+const getSingleProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).populate('profile').select('-password');
+    if (!user) return sendResponse(res, 404, false, 'User not found');
+
+    return sendResponse(res, 200, true, 'Single profile fetched', {
+      user,
+      profile: user.profile
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 
 //! ================= Update Profile =====================
 const updateProfile = async (req, res, next) => {
-    try {
-        const { username, dateOfBirth, about, contactNumber, location } = req.body;
-        const userId = req.user.userId;
+  try {
+    const {
+      username,
+      about,
+      contactNumber,
+      location,
+      workingHours,
+      certifications,
+      services
+    } = req.body;
 
-        // Find user with profile
-        const user = await User.findById(userId)
-            .populate('profile')
-            .select('-password');
+    const userId = req.user.userId;
 
-        if (!user) {
-            return sendResponse(res, 404, false, 'User not found');
-        }
+    const user = await User.findById(userId).populate('profile').select('-password');
 
-        // Update username if provided
-        if (username) {
-            if (username.length < 3 || username.length > 30) {
-                return sendResponse(res, 400, false, 'Username must be between 3-30 characters');
-            }
-            user.username = username;
-            await user.save();
-        }
-
-        // Prepare profile updates
-        const profileUpdates = {};
-        if (dateOfBirth) profileUpdates.dateOfBirth = new Date(dateOfBirth);
-        if (about) profileUpdates.about = about;
-        if (contactNumber) {
-            if (!/^\d{10,15}$/.test(contactNumber)) {
-                return sendResponse(res, 400, false, 'Invalid contact number format');
-            }
-            profileUpdates.contactNumber = contactNumber;
-        }
-        if (location) profileUpdates.location = location;
-
-        // Update profile
-        const updatedProfile = await Profile.findByIdAndUpdate(
-            user.profile._id,
-            profileUpdates,
-            { new: true }
-        );
-
-        return sendResponse(res, 200, true, 'Profile updated successfully', {
-            user: {
-                _id: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                image: user.image
-            },
-            profile: updatedProfile
-        });
-
-    } catch (error) {
-        next(error);
+    if (!user) {
+      return sendResponse(res, 404, false, 'User not found');
     }
-};
 
+    // Update username if provided
+    if (username) {
+      if (username.length < 3 || username.length > 30) {
+        return sendResponse(res, 400, false, 'Garage name must be between 3-30 characters');
+      }
+      user.username = username;
+      await user.save();
+    }
+
+    const profileUpdates = {};
+
+    if (about) profileUpdates.about = about;
+    if (contactNumber) {
+      if (!/^\d{10,15}$/.test(contactNumber)) {
+        return sendResponse(res, 400, false, 'Invalid phone number format');
+      }
+      profileUpdates.contactNumber = contactNumber;
+    }
+    if (location) profileUpdates.location = location;
+    if (workingHours) profileUpdates.workingHours = workingHours;
+    if (certifications) profileUpdates.certifications = certifications;
+    if (services) profileUpdates.services = services;
+
+    const updatedProfile = await Profile.findByIdAndUpdate(
+      user.profile._id,
+      profileUpdates,
+      { new: true }
+    );
+
+    return sendResponse(res, 200, true, 'Profile updated successfully', {
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        image: user.image
+      },
+      profile: updatedProfile
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
 
 
 //! ================= Upload Profile Picture =====================
@@ -170,6 +187,7 @@ const deleteProfile = async (req, res, next) => {
 
 module.exports = {
     getProfile,
+    getSingleProfile,
     updateProfile,
     uploadProfilePicture,
     deleteProfile

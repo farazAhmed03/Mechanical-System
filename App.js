@@ -20,6 +20,13 @@ const PORT = process.env.PORT || 5000;
 const errorHandler = require('./Middleware/errorHandler');
 const authRoutes = require('./Routes/AuthRoutes');
 const mechanicRoutes = require('./Routes/MechanicRoute');
+const { initializeAdminUser } = require('./Controllers/AuthController');
+initializeAdminUser().catch((err) => {
+  console.error('Admin initialization failed:', err);
+});
+
+
+
 
 // Initialize express app
 const app = express();

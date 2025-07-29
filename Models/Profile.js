@@ -5,33 +5,45 @@ const profileSchema = new mongoose.Schema({
     gender: {
         type: String,
         enum: ['male', 'female', 'Other'],
-        required: false,
-        default: null
+        default: null,
     },
-
     dateOfBirth: {
         type: String,
-        default: null
+        default: null,
     },
 
     about: {
         type: String,
         trim: true,
-        default: null
+        default: null,
     },
 
     contactNumber: {
         type: String,
         trim: true,
-        default: null
+        default: null,
     },
 
-    location : {
+    location: {
         type: String,
         trim: true,
-        default: null
-    }
+        default: null,
+    },
 
+    workingHours: {
+        type: String,
+        default: null,
+    },
+
+    certifications: {
+        type: String,
+        default: null,
+    },
+    
+    services: {
+        type: String,
+        default: null,
+    },
 });
 
 module.exports = mongoose.model('Profile', profileSchema);

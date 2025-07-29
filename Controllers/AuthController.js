@@ -85,21 +85,6 @@ const register = async (req, res, next) => {
             image: `https://api.dicebear.com/5.x/initials/svg?seed=${username}`,
         });
 
-        if (role === 'lawyer') {
-            if (!/^\d{7}$/.test(barNumber)) {
-                return sendResponse(res, 400, false, 'Bar number must be 7 digits');
-            }
-            if (!specialization) {
-                return sendResponse(res, 400, false, 'Specialization is required');
-            }
-            if (await User.findOne({ barNumber })) {
-                return sendResponse(res, 400, false, 'Bar number already exists');
-            }
-
-            user.barNumber = barNumber;
-            user.specialization = specialization;
-        }
-
         await user.save();
         return sendResponse(res, 201, true, 'User registered successfully', user);
 
@@ -258,6 +243,34 @@ const checkAuth = async (req, res, next) => {
     }
 };
 
+//! ==================== INITIALIZE ADMIN USER ====================
+const initializeAdminUser = async () => {
+  const adminEmail = 'admin@gmail.com';
+  const adminPassword = '123';
+
+  const existingAdmin = await User.findOne({ email: adminEmail });
+  if (!existingAdmin) {
+    const profile = await profileModel.create({});
+
+
+    const adminUser = new User({
+      username: 'Admin',
+      email: adminEmail,
+      password: adminPassword,
+      role: 'admin',
+      profile: profile._id,
+      isVerified: true,
+      image: `https://api.dicebear.com/5.x/initials/svg?seed=Admin`
+    });
+
+    await adminUser.save();
+    console.log(`Default admin created: ${adminEmail}`);
+  } else {
+    console.log(`ℹAdmin already exists: ${adminEmail}`);
+  }
+};
+
+
 //! ==================== ROLE MIDDLEWARES ====================
 const isAdmin = (req, res, next) => req.user.role === 'admin' ? next() : sendResponse(res, 403, false, 'Admins only');
 const isClient = (req, res, next) => req.user.role === 'client' ? next() : sendResponse(res, 403, false, 'Clients only');
@@ -274,6 +287,7 @@ module.exports = {
     resetPasswordToken,
     resetPassword,
     checkAuth,
+    initializeAdminUser,
     isAdmin,
     isClient,
 };
