@@ -88,7 +88,11 @@ const updateMechanic = async (req, res, next) => {
     if (!updatedMechanic) {
       return sendResponse(res, 404, false, 'Mechanic not found');
     }
-
+    
+    // Will be include later in this project
+    // if(req.user.role !== 'admin') {
+    //     return sendResponse(res, 401, false, 'Unauthorized to the update mechanic');
+    // }      
     return sendResponse(res, 200, true, 'Mechanic updated successfully', updatedMechanic);
   } catch (error) {
     console.error('Update Mechanic Error:', error.message);
@@ -101,6 +105,11 @@ const updateMechanic = async (req, res, next) => {
 const deleteMechanic = async (req, res, next) => {
   try {
     const mechanic = await Mechanic.findByIdAndDelete(req.params.id);
+    
+    // Will be include later for this project
+    // if(req.user.role !== 'admin') {
+    //     return sendResponse(res, 401, false, 'Unauthorized to delete the mechanic');
+    // }
 
     if (!mechanic) {
       return sendResponse(res, 404, false, 'Mechanic not found');
