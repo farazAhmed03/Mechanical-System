@@ -24,10 +24,6 @@ const addMechanic = async (req, res, next) => {
       return sendResponse(res, 400, false, 'Invalid type. Choose Old or New.');
     }
 
-    if(req.user.role !== 'admin') {
-      return sendResponse(res, 403, false, 'Only admin can add mechanic');
-    }
-
     // Save mechanic to DB
     const mechanic = await Mechanic.create({
       name,

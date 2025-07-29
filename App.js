@@ -19,26 +19,10 @@ const PORT = process.env.PORT || 5000;
 // Routes and Middleware
 const errorHandler = require('./Middleware/errorHandler');
 const authRoutes = require('./Routes/AuthRoutes');
+const mechanicRoutes = require('./Routes/MechanicRoute');
 
 // Initialize express app
 const app = express();
-const server = http.createServer(app);
-const io = socketIO(server, {
-  origin: [
-    "http://localhost:5173", 
-    "http://localhost:3001",
-    "http://127.0.0.1:5500",
-    "http://localhost:5500"
-  ],
-  credentials: true
-});
-
-// Attach io instance to req
-app.set('io', io);
-app.use((req, res, next) => {
-  req.io = io;
-  next();
-});
 
 // Middleware
 app.use(express.json());
@@ -67,6 +51,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 
 // API Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/mechanic', mechanicRoutes);
 
 // Default Route
 app.get('/', (req, res) => {
@@ -78,7 +63,7 @@ app.use(errorHandler);
 
 
 // Server listening
-server.listen(PORT, async () => {
+app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   await dbConnect();
 });

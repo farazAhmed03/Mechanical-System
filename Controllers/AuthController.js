@@ -139,6 +139,34 @@ const login = async (req, res, next) => {
 };
 
 
+// //! ==================== Admin Login =======================
+// const adminLogin = async (req, res, next) => {
+//     try {
+//         const { email, password } = req.body;
+//         const user = await User.findOne({ email, role: "admin" });
+//         if (!user || !(await user.comparePassword(password))) {
+//             return sendResponse(res, 401, false, 'Invalid credentials');
+//         }
+//         const token = generateToken({ userId: user._id, role: user.role });
+
+//         const cookieOptions = {
+//             httpOnly: true,
+//             secure: process.env.NODE_ENV === 'production',
+//             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+//             expires: new Date(Date.now() + 3600000),
+//         };
+
+//         user = user.toObject();
+//         delete user.password;
+//         user.token = token;
+//         res.cookie('token', token, cookieOptions);
+
+//         return sendResponse(res, 200, true, 'Login successful', user);
+//     } catch (error) {
+//         next(error);
+//     }
+// }
+
 //! ==================== LOGOUT ====================
 const logout = async (req, res, next) => {
     const user = req.user.userId;
