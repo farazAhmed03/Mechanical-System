@@ -65,7 +65,7 @@ const verifyOTP = async (req, res, next) => {
 //! ==================== REGISTER ====================
 const register = async (req, res, next) => {
     try {
-        const { username, email, password, role, barNumber, specialization } = req.body;
+        const { username, email, password, role } = req.body;
 
         if (!username || !email || !password) {
             return sendResponse(res, 400, false, 'All fields are required');
@@ -190,19 +190,25 @@ const resetPassword = async (req, res, next) => {
     const { password, confirmPassword } = req.body;
     const { token } = req.params;
 
-    if (!password || !confirmPassword)
-        return sendResponse(res, 400, false, 'All fields are required');
-    if (password !== confirmPassword)
+    if (!password || !confirmPassword){
+        return sendResponse(res, 400, false, 'All fields are required');about
+    }
+
+    if (password !== confirmPassword){
         return sendResponse(res, 400, false, 'Passwords do not match');
+    }
 
     try {
         const user = await User.findOne({ resetPasswordToken: token });
-
-        if (!user) return sendResponse(res, 400, false, 'Invalid or expired token');
-        if (user.resetPasswordExpiresAt < Date.now())
+        if (!user) {
+            return sendResponse(res, 400, false, 'Invalid or expired token');
+        }
+        
+        if (user.resetPasswordExpiresAt < Date.now()){
             return sendResponse(res, 400, false, 'Token expired');
+        }
 
-        user.password = await bcrypt.hash(password, 10);
+        user.password = password;
         user.resetPasswordToken = null;
         user.resetPasswordExpiresAt = null;
         await user.save();
@@ -226,7 +232,6 @@ const checkAuth = async (req, res, next) => {
 
 //! ==================== ROLE MIDDLEWARES ====================
 const isAdmin = (req, res, next) => req.user.role === 'admin' ? next() : sendResponse(res, 403, false, 'Admins only');
-const isLawyer = (req, res, next) => req.user.role === 'lawyer' ? next() : sendResponse(res, 403, false, 'Lawyers only');
 const isClient = (req, res, next) => req.user.role === 'client' ? next() : sendResponse(res, 403, false, 'Clients only');
 
 
@@ -242,6 +247,5 @@ module.exports = {
     resetPassword,
     checkAuth,
     isAdmin,
-    isLawyer,
     isClient,
 };

@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true,
         lowercase: true,
-        enum: ['admin', 'lawyer', 'client', 'user'],
+        enum: ['admin','client', 'user'],
         default: 'user'
     },
 
@@ -49,6 +49,11 @@ const userSchema = new mongoose.Schema({
     isVerified: {
         type: Boolean,
         default: false
+    },
+
+    attempts : {
+        type: Number,
+        default: 0,
     },
 
     resetPasswordToken: String,

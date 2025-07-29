@@ -25,7 +25,6 @@ router.put('/profile/upload', auth, upload.single('image'), profileController.up
 
 // Protected Routes 
 router.get('/admin', auth, authController.isAdmin, async(req, res) => res.send("Admin Route"));
-router.get('/lawyer', auth, authController.isLawyer, async(req, res) => res.send("Lawyer Route"));
 router.get('/client', auth, authController.isClient, async(req, res) => res.send("Client Route"));
 router.get('/user', async(req, res) => res.send("User Route"));
 

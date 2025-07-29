@@ -14,21 +14,23 @@ dotenv.config();
 
 // Custom Imports
 const dbConnect = require('./Config/database');
-const socketHandler = require('./Sockets/SocketHandler');
+const PORT = process.env.PORT || 5000;
 
 // Routes and Middleware
 const errorHandler = require('./Middleware/errorHandler');
-const authRoutes = require('./Routers/AuthRoutes');
-const chatRoutes = require('./Routers/ChatRoute');
+const authRoutes = require('./Routes/AuthRoutes');
 
 // Initialize express app
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, {
-  cors: {
-    origin: ["http://localhost:3001", "http://127.0.0.1:5500", "http://localhost:5500"],
-    credentials: true
-  }
+  origin: [
+    "http://localhost:5173", 
+    "http://localhost:3001",
+    "http://127.0.0.1:5500",
+    "http://localhost:5500"
+  ],
+  credentials: true
 });
 
 // Attach io instance to req
@@ -42,9 +44,15 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: ["http://localhost:3001", "http://127.0.0.1:5500", "http://localhost:5500"],
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:3001",
+    "http://127.0.0.1:5500",
+    "http://localhost:5500"
+  ],
   credentials: true
 }));
+
 app.use(helmet());
 app.use(morgan('dev'));
 // app.use(generalLimiter);
@@ -59,7 +67,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 
 // API Routes
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/chat', chatRoutes);
 
 // Default Route
 app.get('/', (req, res) => {
@@ -69,17 +76,9 @@ app.get('/', (req, res) => {
 // Error Handler
 app.use(errorHandler);
 
-// Start server
-const PORT = process.env.PORT || 5000;
+
+// Server listening
 server.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   await dbConnect();
-});
-
-// Socket Handler
-socketHandler(io);
-
-// Optional: Log each socket connection
-io.on('connection', (socket) => {
-  console.log(' User connected:', socket.id);
 });
